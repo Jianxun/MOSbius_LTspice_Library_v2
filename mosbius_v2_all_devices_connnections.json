@@ -1,0 +1,65 @@
+{
+  "connections": {
+    "RBUS1": [
+      "DCC2_N_L_G_CS#34"
+    ],
+    "RBUS2": [
+      "DCC2_P_L_G_CS#77",
+      "DCC2_P_R_G_CS#79"
+    ],
+    "RBUS3": [],
+    "RBUS4": [
+      "DCC2_N_L_D_CC#37",
+      "DCC2_N_R_G_CC#35",
+      "DCC2_P_L_D_CC#82",
+      "DCC2_P_R_G_CC#80"
+    ],
+    "RBUS5": [
+      "DCC2_N_R_D_CC#39",
+      "DCC2_P_R_D_CC#84",
+      "DCC3_N_L_G_CC#17",
+      "DCC3_P_L_G_CC#70"
+    ],
+    "RBUS6": [
+      "DCC3_N_L_D_CC#21",
+      "DCC3_P_L_D_CC#74"
+    ],
+    "RBUS7": [],
+    "RBUS8": [],
+    "SBUS1": [
+      "DCC2_N_L_G_CC#33",
+      "DCC2_P_L_G_CC#78"
+    ],
+    "SBUS2": [],
+    "SBUS3": [],
+    "SBUS4": [],
+    "SBUS5": [],
+    "SBUS6": []
+  },
+  "sizes": {
+    "CC_N": 1,
+    "CC_P": 1,
+    "DCC1_N_L": 1,
+    "DCC1_N_R": 1,
+    "DCC1_P_L": 1,
+    "DCC1_P_R": 1,
+    "DCC2_N_L": 1,
+    "DCC2_N_R": 1,
+    "DCC2_P_L": 1,
+    "DCC2_P_R": 1,
+    "DCC3_N_L": 1,
+    "DCC3_N_R": 1,
+    "DCC3_P_L": 1,
+    "DCC3_P_R": 1,
+    "DCC4_N_L": 1,
+    "DCC4_N_R": 1,
+    "DCC4_P_L": 1,
+    "DCC4_P_R": 1,
+    "DINV1_L": 1,
+    "DINV1_R": 1,
+    "DINV2_L": 1,
+    "DINV2_R": 1,
+    "OTA_N": 1,
+    "OTA_P": 1
+  }
+}
