@@ -363,7 +363,13 @@ def main():
         if mapped_net.lower() == "nc":
             connections[bus] = []
             continue
-        terminals = sorted(net_to_terminals.get(mapped_net, set()))
+        terminal_set = set(net_to_terminals.get(mapped_net, set()))
+        if valid_terminals is not None and mapped_net in valid_terminals:
+            if name_to_number is not None and mapped_net in name_to_number:
+                terminal_set.add("{}#{}".format(mapped_net, name_to_number[mapped_net]))
+            else:
+                terminal_set.add(mapped_net)
+        terminals = sorted(terminal_set)
         if not terminals:
             _warn("bus '{}' maps to net '{}' but resolves to no terminals".format(bus, mapped_net))
         connections[bus] = terminals

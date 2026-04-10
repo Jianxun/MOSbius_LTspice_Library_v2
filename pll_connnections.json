@@ -6,48 +6,54 @@
       "DCC3_N_L_G_CS#18",
       "DCC3_N_R_G_CS#20",
       "DCC4_N_L_G_CS#26",
-      "VDD#13"
+      "DCC4_N_R_G_CS#28"
     ],
     "RBUS2": [
+      "DCC2_N_L_D_CS#38",
+      "DCC2_P_L_D_CS#81",
       "DCC2_P_L_G_CS#77",
       "DCC2_P_R_G_CS#79",
       "DCC3_P_L_G_CS#69",
       "DCC3_P_R_G_CS#71",
       "DCC4_P_L_G_CS#93",
-      "VSS#1"
+      "DCC4_P_R_G_CS#95"
     ],
-    "RBUS3": [],
-    "RBUS4": [
-      "DCC2_N_L_D_CC#37",
-      "DCC2_N_R_G_CC#35",
-      "DCC2_P_L_D_CC#82",
-      "DCC2_P_R_G_CC#80"
-    ],
-    "RBUS5": [
+    "RBUS3": [
       "DCC2_N_R_D_CC#39",
       "DCC2_P_R_D_CC#84",
       "DCC3_N_L_G_CC#17",
       "DCC3_P_L_G_CC#70"
     ],
-    "RBUS6": [
+    "RBUS4": [
       "DCC3_N_L_D_CC#21",
       "DCC3_N_R_G_CC#19",
       "DCC3_P_L_D_CC#74",
       "DCC3_P_R_G_CC#72"
     ],
-    "RBUS7": [
+    "RBUS5": [
       "DCC3_N_R_D_CC#23",
       "DCC3_P_R_D_CC#76",
       "DCC4_N_L_G_CC#25",
       "DCC4_P_L_G_CC#94"
     ],
-    "RBUS8": [],
-    "SBUS1": [
-      "DCC2_N_L_G_CC#33",
-      "DCC2_P_L_G_CC#78",
+    "RBUS6": [
       "DCC4_N_L_D_CC#29",
-      "DCC4_P_L_D_CC#98"
+      "DCC4_N_R_G_CC#27",
+      "DCC4_P_L_D_CC#98",
+      "DCC4_P_R_G_CC#96"
     ],
+    "RBUS7": [
+      "DCC2_N_R_G_CC#35",
+      "DCC2_P_R_G_CC#80",
+      "DCC4_N_R_D_CC#31",
+      "DCC4_P_R_D_CC#100",
+      "DINV1_L_INN#56",
+      "DINV1_L_INP#55"
+    ],
+    "RBUS8": [
+      "DINV1_L_OUT#57"
+    ],
+    "SBUS1": [],
     "SBUS2": [],
     "SBUS3": [],
     "SBUS4": [],
@@ -57,23 +63,23 @@
   "sizes": {
     "CC_N": 1,
     "CC_P": 1,
-    "DCC1_N_L": 16,
-    "DCC1_N_R": 16,
-    "DCC1_P_L": 16,
-    "DCC1_P_R": 16,
-    "DCC2_N_L": 16,
-    "DCC2_N_R": 16,
-    "DCC2_P_L": 16,
-    "DCC2_P_R": 16,
-    "DCC3_N_L": 16,
-    "DCC3_N_R": 16,
-    "DCC3_P_L": 16,
-    "DCC3_P_R": 16,
-    "DCC4_N_L": 16,
-    "DCC4_N_R": 16,
-    "DCC4_P_L": 16,
-    "DCC4_P_R": 16,
-    "DINV1_L": 1,
+    "DCC1_N_L": 1,
+    "DCC1_N_R": 1,
+    "DCC1_P_L": 1,
+    "DCC1_P_R": 1,
+    "DCC2_N_L": 1,
+    "DCC2_N_R": 8,
+    "DCC2_P_L": 1,
+    "DCC2_P_R": 8,
+    "DCC3_N_L": 8,
+    "DCC3_N_R": 8,
+    "DCC3_P_L": 8,
+    "DCC3_P_R": 8,
+    "DCC4_N_L": 8,
+    "DCC4_N_R": 8,
+    "DCC4_P_L": 8,
+    "DCC4_P_R": 8,
+    "DINV1_L": 16,
     "DINV1_R": 1,
     "DINV2_L": 1,
     "DINV2_R": 1,
