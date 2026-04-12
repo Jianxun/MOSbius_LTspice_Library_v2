@@ -19,7 +19,7 @@ def _warn(message):
 def _usage():
     script = os.path.basename(sys.argv[0])
     return (
-        "Usage: {} <netlist.net> [output.json] [--pin-number-to-name path] [--pin-name-to-number path] [--size-map path]\n".format(script)
+        "Usage: {} <netlist.net> [output.json] [--pin-number-to-name path] [--pin-name-to-number path]\n".format(script)
         + "Default output: <netlist_name>_config.json (same folder as netlist)\n"
         + "If mapping paths are omitted, script tries local defaults relative to itself.\n"
     )
@@ -83,13 +83,11 @@ def _parse_param_ints(lines):
 def _resolve_m_value(token, params):
     if token is None:
         return None
-    parsed = _parse_int_token(token)
-    if parsed is not None:
-        return parsed
-
     token = token.strip()
     if token.startswith("{") and token.endswith("}"):
         token = token[1:-1].strip()
+    if re.fullmatch(r"[+-]?\d+", token):
+        return int(token)
     if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", token):
         return params.get(token.upper())
     return None
@@ -160,17 +158,6 @@ def _parse_top_instances(lines, stop_line):
     return out
 
 
-def _canonical_device_name(instance_name):
-    if instance_name in ("CC1_N",):
-        return "CC_N"
-    if instance_name in ("CC1_P",):
-        return "CC_P"
-    if instance_name in ("OTA_NMOS",):
-        return "OTA_N"
-    if instance_name in ("OTA_PMOS",):
-        return "OTA_P"
-    return instance_name
-
 
 def _is_mosbius_device(device_name):
     if re.fullmatch(r"DCC\d+_[NP]_[LR]", device_name):
@@ -206,7 +193,6 @@ def _parse_args(argv):
     if len(argv) < 2:
         raise ValueError("missing netlist path")
 
-    size_map_path = None
     pin_number_to_name_path = None
     pin_name_to_number_path = None
     positionals = []
@@ -218,14 +204,7 @@ def _parse_args(argv):
             print(_usage())
             raise SystemExit(0)
 
-        if arg.startswith("--size-map="):
-            size_map_path = arg.split("=", 1)[1].strip()
-        elif arg == "--size-map":
-            if i + 1 >= len(argv):
-                raise ValueError("Missing value for --size-map")
-            size_map_path = argv[i + 1].strip()
-            i += 1
-        elif arg.startswith("--pin-number-to-name="):
+        if arg.startswith("--pin-number-to-name="):
             pin_number_to_name_path = arg.split("=", 1)[1].strip()
         elif arg == "--pin-number-to-name":
             if i + 1 >= len(argv):
@@ -250,12 +229,12 @@ def _parse_args(argv):
 
     netlist_path = positionals[0]
     output_path = positionals[1] if len(positionals) == 2 else _derive_output_path(netlist_path)
-    return netlist_path, output_path, size_map_path, pin_number_to_name_path, pin_name_to_number_path
+    return netlist_path, output_path, pin_number_to_name_path, pin_name_to_number_path
 
 
 def main():
     try:
-        netlist_path, output_path, size_map_arg, pin_number_to_name_arg, pin_name_to_number_arg = _parse_args(sys.argv)
+        netlist_path, output_path, pin_number_to_name_arg, pin_name_to_number_arg = _parse_args(sys.argv)
     except ValueError as e:
         print("Error: {}".format(e))
         print(_usage())
@@ -265,15 +244,6 @@ def main():
     parent_dir = os.path.dirname(base_dir)
 
     chip_config_data_dir = os.path.join(base_dir, CHIP_CONFIG_DATA_DIR)
-    default_size_map_path = _first_existing(
-        [
-            os.path.join(chip_config_data_dir, "device_name_to_sizing_registers.json"),
-            os.path.join(base_dir, "V2", "tools", "chip_config_data", "device_name_to_sizing_registers.json"),
-            os.path.join(base_dir, "tools", "chip_config_data", "device_name_to_sizing_registers.json"),
-            os.path.join(base_dir, "chip_config_data", "device_name_to_sizing_registers.json"),
-            os.path.join(parent_dir, "V2", "tools", "chip_config_data", "device_name_to_sizing_registers.json"),
-        ]
-    )
     default_pin_number_to_name_path = _first_existing(
         [
             os.path.join(chip_config_data_dir, "pin_number_to_name.json"),
@@ -286,31 +256,17 @@ def main():
         ]
     )
 
-    size_map_path = size_map_arg or default_size_map_path
     pin_number_to_name_path = pin_number_to_name_arg or default_pin_number_to_name_path
     pin_name_to_number_path = pin_name_to_number_arg
 
-    expected_devices = None
-    size_map_used = None
-    if size_map_path and os.path.exists(size_map_path):
-        expected_devices = set(_load_json(size_map_path).keys())
-        size_map_used = size_map_path
-    elif size_map_arg:
-        raise ValueError("size map path not found: '{}'".format(size_map_arg))
-    else:
-        _warn("size map not found; device completeness checks disabled")
-
     name_to_number = None
-    terminal_map_used = None
     if pin_name_to_number_path and os.path.exists(pin_name_to_number_path):
         name_to_number = _load_json(pin_name_to_number_path)
-        terminal_map_used = pin_name_to_number_path
     elif pin_name_to_number_arg:
         raise ValueError("pin-name-to-number map path not found: '{}'".format(pin_name_to_number_arg))
     elif pin_number_to_name_path and os.path.exists(pin_number_to_name_path):
         number_to_name = _load_json(pin_number_to_name_path)
         name_to_number = {str(name): int(number) for number, name in number_to_name.items()}
-        terminal_map_used = pin_number_to_name_path
     elif pin_number_to_name_arg:
         raise ValueError("pin-number-to-name map path not found: '{}'".format(pin_number_to_name_arg))
     else:
@@ -318,7 +274,7 @@ def main():
 
     valid_terminals = set(name_to_number.keys()) if name_to_number is not None else None
 
-    text, encoding = _read_text_auto(netlist_path)
+    text, _ = _read_text_auto(netlist_path)
     lines = text.splitlines()
     params = _parse_param_ints(lines)
     bus_map = _parse_bus_map(lines)
@@ -329,7 +285,7 @@ def main():
     for inst in instances:
         line = inst["line"]
         instance_name = inst["instance"]
-        device_name = _canonical_device_name(instance_name)
+        device_name = instance_name
         if not _is_mosbius_device(device_name):
             continue
         subckt = inst["subckt"]
@@ -371,26 +327,18 @@ def main():
             continue
         annotated_bus = "{}#{}".format(bus, mapped_net)
         terminal_set = set(net_to_terminals.get(mapped_net, set()))
-        if valid_terminals is not None and mapped_net in valid_terminals:
-            if name_to_number is not None and mapped_net in name_to_number:
-                terminal_set.add("{}#{}".format(mapped_net, name_to_number[mapped_net]))
-            else:
-                terminal_set.add(mapped_net)
+        if mapped_net in {"VDD", "VSS"} and name_to_number is not None and mapped_net in name_to_number:
+            terminal_set.add("{}#{}".format(mapped_net, name_to_number[mapped_net]))
         terminals = sorted(terminal_set)
         if not terminals:
             _warn("bus '{}' maps to net '{}' but resolves to no terminals".format(bus, mapped_net))
         connections[annotated_bus] = terminals
 
     sizes = {}
-    seen_devices = set()
     for inst in instances:
-        device_name = _canonical_device_name(inst["instance"])
-        if expected_devices is not None:
-            if device_name not in expected_devices:
-                continue
-        elif not _is_mosbius_device(device_name):
+        device_name = inst["instance"]
+        if not _is_mosbius_device(device_name):
             continue
-        seen_devices.add(device_name)
 
         value = _resolve_m_value(inst["m_token"], params)
         if value is None:
@@ -405,10 +353,6 @@ def main():
             continue
         sizes[device_name] = value
 
-    if expected_devices is not None:
-        for missing in sorted(expected_devices - seen_devices):
-            _warn("expected device '{}' not found in top-level netlist".format(missing))
-
     output = {
         "connections": connections,
         "sizes": {k: sizes[k] for k in sorted(sizes.keys())},
@@ -418,20 +362,7 @@ def main():
         json.dump(output, f, indent=2)
         f.write("\n")
 
-    print(
-        "Wrote {} from {} (encoding={}, instances={}, nonempty_buses={}, sizes={})".format(
-            output_path,
-            netlist_path,
-            encoding,
-            len(instances),
-            sum(1 for v in connections.values() if v),
-            len(sizes),
-        )
-    )
-    if size_map_used:
-        print("Size map: {}".format(size_map_used))
-    if terminal_map_used:
-        print("Terminal map: {}".format(terminal_map_used))
+    print("Wrote {} from {}".format(output_path, netlist_path))
 
 
 if __name__ == "__main__":
