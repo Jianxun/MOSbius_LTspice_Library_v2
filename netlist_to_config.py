@@ -8,6 +8,9 @@ EXPECTED_RBUS = 8
 EXPECTED_SBUS = 6
 HARDWIRED_PORTS = {"BIASN", "BIASP"}
 
+# Directory (relative to repo root) containing canonical chip config JSON files.
+CHIP_CONFIG_DATA_DIR = "micropython_runtime/mosbius"
+
 
 def _warn(message):
     print("Warning: {}".format(message))
@@ -17,7 +20,7 @@ def _usage():
     script = os.path.basename(sys.argv[0])
     return (
         "Usage: {} <netlist.net> [output.json] [--pin-number-to-name path] [--pin-name-to-number path] [--size-map path]\n".format(script)
-        + "Default output: <netlist_name>_connnections.json (same folder as netlist)\n"
+        + "Default output: <netlist_name>_config.json (same folder as netlist)\n"
         + "If mapping paths are omitted, script tries local defaults relative to itself.\n"
     )
 
@@ -189,7 +192,7 @@ def _ordered_buses():
 def _derive_output_path(netlist_path):
     folder = os.path.dirname(os.path.abspath(netlist_path))
     stem = os.path.splitext(os.path.basename(netlist_path))[0]
-    return os.path.join(folder, "{}_connnections.json".format(stem))
+    return os.path.join(folder, "{}_config.json".format(stem))
 
 
 def _first_existing(paths):
@@ -261,8 +264,10 @@ def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(base_dir)
 
+    chip_config_data_dir = os.path.join(base_dir, CHIP_CONFIG_DATA_DIR)
     default_size_map_path = _first_existing(
         [
+            os.path.join(chip_config_data_dir, "device_name_to_sizing_registers.json"),
             os.path.join(base_dir, "V2", "tools", "chip_config_data", "device_name_to_sizing_registers.json"),
             os.path.join(base_dir, "tools", "chip_config_data", "device_name_to_sizing_registers.json"),
             os.path.join(base_dir, "chip_config_data", "device_name_to_sizing_registers.json"),
@@ -271,6 +276,7 @@ def main():
     )
     default_pin_number_to_name_path = _first_existing(
         [
+            os.path.join(chip_config_data_dir, "pin_number_to_name.json"),
             os.path.join(base_dir, "pin_number_to_name.json"),
             os.path.join(base_dir, "V2", "tools", "chip_config_data", "pin_number_to_name.json"),
             os.path.join(base_dir, "tools", "chip_config_data", "pin_number_to_name.json"),
@@ -363,6 +369,7 @@ def main():
         if mapped_net.lower() == "nc":
             connections[bus] = []
             continue
+        annotated_bus = "{}#{}".format(bus, mapped_net)
         terminal_set = set(net_to_terminals.get(mapped_net, set()))
         if valid_terminals is not None and mapped_net in valid_terminals:
             if name_to_number is not None and mapped_net in name_to_number:
@@ -372,7 +379,7 @@ def main():
         terminals = sorted(terminal_set)
         if not terminals:
             _warn("bus '{}' maps to net '{}' but resolves to no terminals".format(bus, mapped_net))
-        connections[bus] = terminals
+        connections[annotated_bus] = terminals
 
     sizes = {}
     seen_devices = set()
